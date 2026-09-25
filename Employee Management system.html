@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Employee Management System</title>
+<style>
+:root{
+  --bg:#f5f7f8; --surface:#ffffff; --surface2:#edf2f4; --border:#d8e2e6;
+  --text:#1e2930; --text2:#708090; --accent:#008080; --accent-hover:#006666; --accent-bg:#e6f2f2;
+  --radius:10px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12181b; --surface:#1a2227; --surface2:#222d34; --border:#2e3b44;
+    --text:#ffffff; --text2:#9bb0c1; --accent:#20b2aa; --accent-hover:#2ec4b6; --accent-bg:rgba(0, 128, 128, 0.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12181b; --surface:#1a2227; --surface2:#222d34; --border:#2e3b44;
+  --text:#ffffff; --text2:#9bb0c1; --accent:#20b2aa; --accent-hover:#2ec4b6; --accent-bg:rgba(0, 128, 128, 0.25);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family:-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg); color:var(--text); height:100%;
+  display:flex; min-height:100vh;
+}
+#sidebar{
+  width:230px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border);
+  padding:16px 12px; padding-top:calc(16px + env(safe-area-inset-top,0px));
+  display:flex; flex-direction:column; gap:3px;
+}
+.brand{
+  display:flex; align-items:center; gap:10px; padding:6px 8px 16px;
+  border-bottom:1px solid var(--border); margin-bottom:10px;
+}
+.brand-badge{
+  background:var(--accent); color:#ffffff; font-weight:700; font-size:12px;
+  padding:5px 8px; border-radius:6px; letter-spacing:0.5px;
+}
+.brand-title{font-size:14px; font-weight:700; color:var(--text); line-height:1.2;}
+.brand-sub{font-size:11px; color:var(--text2); line-height:1.2; margin-top:2px;}
+.nav-btn{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:9px 12px; border:none; background:none; color:var(--text2);
+  font-size:14px; border-radius:8px; cursor:pointer; font-weight:500;
+  transition:background 0.15s ease, color 0.15s ease;
+}
+.nav-btn:hover{background:var(--surface2); color:var(--text);}
+.nav-btn.active{background:var(--accent-bg); color:var(--accent); font-weight:600;}
+#main{flex:1; padding:28px 32px; overflow-x:auto; min-width:0;}
+.section{display:none;}
+.section.active{display:block;}
+h2{font-size:20px; font-weight:700; margin-bottom:4px; color:var(--text);}
+.sub{color:var(--text2); font-size:13px; margin-bottom:20px;}
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:24px;}
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px;
+  box-shadow:0 1px 3px rgba(112, 128, 144, 0.08); transition:border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.card:hover{border-color:var(--accent); box-shadow:0 3px 8px rgba(0, 128, 128, 0.12);}
+.card .num{font-size:24px; font-weight:700; color:var(--accent);}
+.card .lbl{font-size:12px; color:var(--text2); margin-top:3px; font-weight:500;}
+table{width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+th,td{text-align:left; padding:10px 14px; font-size:13px; border-bottom:1px solid var(--border);}
+th{color:var(--text2); font-weight:600; background:var(--surface2); font-size:12px; text-transform:uppercase; letter-spacing:0.4px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(0, 128, 128, 0.02);}
+.badge{padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600;}
+.b-green{background:#e6f3f3; color:#005e5e;}
+.b-amber{background:#fdf5e6; color:#85550a;}
+.b-red{background:#fbeeee; color:#872020;}
+.tools{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+input[type=text]{
+  padding:8px 12px; border:1px solid var(--border); border-radius:8px; background:var(--surface);
+  color:var(--text); font-size:13px; width:220px; outline:none;
+  transition:border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input[type=text]:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(0, 128, 128, 0.18);}
+.btn{
+  padding:8px 14px; border-radius:8px; border:none; background:var(--accent); color:#ffffff;
+  font-size:13px; cursor:pointer; font-weight:600; transition:background 0.15s ease;
+}
+.btn:hover{background:var(--accent-hover);}
+.list{display:flex; flex-direction:column; gap:10px;}
+.item{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:14px 16px; display:flex; justify-content:space-between; align-items:center;
+  transition:border-color 0.15s ease;
+}
+.item:hover{border-color:var(--accent);}
+.item .t{font-size:14px; font-weight:600; color:var(--text);}
+.item .s{font-size:12px; color:var(--text2); margin-top:2px;}
+@media(max-width:640px){
+  body{flex-direction:column;}
+  #sidebar{width:100%; flex-direction:row; overflow-x:auto; border-right:none; border-bottom:1px solid var(--border); padding:10px;}
+  .brand{border-bottom:none; margin-bottom:0; padding:4px 8px;}
+  .brand-sub{display:none;}
+  #main{padding:20px;}
+}
+</style>
+</head>
+<body>
+
+<nav id="sidebar"></nav>
+<main id="main"></main>
+
+<script>
+const sections = [
+  {id:'dashboard', label:'Dashboard'},
+  {id:'employees', label:'Employees'},
+  {id:'attendance', label:'Attendance'},
+  {id:'leave', label:'Leave'},
+  {id:'payroll', label:'Payroll'},
+  {id:'recruitment', label:'Recruitment'},
+  {id:'performance', label:'Performance'},
+  {id:'reports', label:'Reports'},
+  {id:'settings', label:'Settings'},
+];
+
+const employees = [
+  {name:'Sarah Chen', dept:'Engineering', role:'Senior Developer', status:'Active'},
+  {name:'Miguel Torres', dept:'Sales', role:'Account Executive', status:'Active'},
+  {name:'Aisha Patel', dept:'HR', role:'HR Manager', status:'Active'},
+  {name:'James Okafor', dept:'Marketing', role:'Content Lead', status:'On Leave'},
+  {name:'Lena Kowalski', dept:'Finance', role:'Analyst', status:'Active'},
+  {name:'Tom Reyes', dept:'Engineering', role:'QA Engineer', status:'Active'},
+];
+
+const attendance = [
+  {name:'Sarah Chen', checkIn:'9:02 AM', checkOut:'6:10 PM', status:'On time'},
+  {name:'Miguel Torres', checkIn:'9:35 AM', checkOut:'6:05 PM', status:'Late'},
+  {name:'Aisha Patel', checkIn:'8:55 AM', checkOut:'5:58 PM', status:'On time'},
+  {name:'James Okafor', checkIn:'—', checkOut:'—', status:'Absent'},
+];
+
+const leaveRequests = [
+  {name:'James Okafor', type:'Sick leave', dates:'Sep 22–26', status:'Approved'},
+  {name:'Tom Reyes', type:'Vacation', dates:'Oct 5–9', status:'Pending'},
+  {name:'Lena Kowalski', type:'Personal', dates:'Sep 30', status:'Pending'},
+];
+
+const payslips = [
+  {name:'Sarah Chen', gross:'$9,200', deductions:'$1,840', net:'$7,360'},
+  {name:'Miguel Torres', gross:'$6,500', deductions:'$1,100', net:'$5,400'},
+  {name:'Aisha Patel', gross:'$7,800', deductions:'$1,560', net:'$6,240'},
+];
+
+const jobs = [
+  {title:'Backend Engineer', dept:'Engineering', applicants:24, stage:'Interviewing'},
+  {title:'Product Designer', dept:'Design', applicants:41, stage:'Screening'},
+  {title:'Sales Rep', dept:'Sales', applicants:12, stage:'Offer sent'},
+];
+
+const reviews = [
+  {name:'Sarah Chen', cycle:'Q3 2026', rating:'Exceeds', reviewer:'D. Kim'},
+  {name:'Miguel Torres', cycle:'Q3 2026', rating:'Meets', reviewer:'A. Patel'},
+  {name:'Tom Reyes', cycle:'Q3 2026', rating:'Meets', reviewer:'D. Kim'},
+];
+
+function badge(status){
+  const map = {Active:'b-green','On time':'b-green',Approved:'b-green',Exceeds:'b-green',
+    'On Leave':'b-amber',Pending:'b-amber',Late:'b-amber',Meets:'b-amber','Interviewing':'b-amber','Screening':'b-amber',
+    Absent:'b-red'};
+  return `<span class="badge ${map[status]||'b-amber'}">${status}</span>`;
+}
+
+function rows(arr, cols){
+  return arr.map(r => `<tr>${cols.map(c => c.badge ? `<td>${badge(r[c.key])}</td>` : `<td>${r[c.key]}</td>`).join('')}</tr>`).join('');
+}
+function table(cols, arr){
+  return `<table><thead><tr>${cols.map(c=>`<th>${c.label}</th>`).join('')}</tr></thead><tbody>${rows(arr,cols)}</tbody></table>`;
+}
+
+const content = {
+  dashboard: () => `
+    <h2>Dashboard</h2>
+    <div class="sub">Company overview at a glance</div>
+    <div class="cards">
+      <div class="card"><div class="num">${employees.length}</div><div class="lbl">Total employees</div></div>
+      <div class="card"><div class="num">${attendance.filter(a=>a.status==='On time').length}/${attendance.length}</div><div class="lbl">Present today</div></div>
+      <div class="card"><div class="num">${leaveRequests.filter(l=>l.status==='Pending').length}</div><div class="lbl">Pending leave requests</div></div>
+      <div class="card"><div class="num">${jobs.reduce((s,j)=>s+j.applicants,0)}</div><div class="lbl">Open applicants</div></div>
+    </div>
+    <h2 style="font-size:15px; margin-bottom:10px;">Recent leave requests</h2>
+    ${table([{key:'name',label:'Employee'},{key:'type',label:'Type'},{key:'dates',label:'Dates'},{key:'status',label:'Status',badge:true}], leaveRequests)}
+  `,
+  employees: () => `
+    <h2>Employees</h2>
+    <div class="sub">${employees.length} people across the company</div>
+    <div class="tools"><input type="text" placeholder="Search employees..."><button class="btn">+ Add employee</button></div>
+    ${table([{key:'name',label:'Name'},{key:'dept',label:'Department'},{key:'role',label:'Role'},{key:'status',label:'Status',badge:true}], employees)}
+  `,
+  attendance: () => `
+    <h2>Attendance</h2>
+    <div class="sub">Today's check-in log</div>
+    ${table([{key:'name',label:'Employee'},{key:'checkIn',label:'Check in'},{key:'checkOut',label:'Check out'},{key:'status',label:'Status',badge:true}], attendance)}
+  `,
+  leave: () => `
+    <h2>Leave</h2>
+    <div class="sub">Requests and approvals</div>
+    <div class="tools"><span></span><button class="btn">+ Request leave</button></div>
+    ${table([{key:'name',label:'Employee'},{key:'type',label:'Type'},{key:'dates',label:'Dates'},{key:'status',label:'Status',badge:true}], leaveRequests)}
+  `,
+  payroll: () => `
+    <h2>Payroll</h2>
+    <div class="sub">Current pay period — September 2026</div>
+    ${table([{key:'name',label:'Employee'},{key:'gross',label:'Gross'},{key:'deductions',label:'Deductions'},{key:'net',label:'Net pay'}], payslips)}
+  `,
+  recruitment: () => `
+    <h2>Recruitment</h2>
+    <div class="sub">Open roles and pipeline</div>
+    <div class="list">
+      ${jobs.map(j=>`<div class="item"><div><div class="t">${j.title}</div><div class="s">${j.dept} · ${j.applicants} applicants</div></div>${badge(j.stage)}</div>`).join('')}
+    </div>
+  `,
+  performance: () => `
+    <h2>Performance</h2>
+    <div class="sub">Latest review cycle</div>
+    ${table([{key:'name',label:'Employee'},{key:'cycle',label:'Cycle'},{key:'rating',label:'Rating',badge:true},{key:'reviewer',label:'Reviewer'}], reviews)}
+  `,
+  reports: () => `
+    <h2>Reports</h2>
+    <div class="sub">Pick a report to view</div>
+    <div class="list">
+      <div class="item"><div><div class="t">Headcount by department</div><div class="s">Updated daily</div></div></div>
+      <div class="item"><div><div class="t">Attendance summary</div><div class="s">Monthly rollup</div></div></div>
+      <div class="item"><div><div class="t">Payroll cost breakdown</div><div class="s">Quarterly</div></div></div>
+      <div class="item"><div><div class="t">Turnover rate</div><div class="s">Annual</div></div></div>
+    </div>
+  `,
+  settings: () => `
+    <h2>Settings</h2>
+    <div class="sub">Company and system configuration</div>
+    <div class="list">
+      <div class="item"><div><div class="t">Company profile</div><div class="s">Name, address, logo</div></div></div>
+      <div class="item"><div><div class="t">Roles & permissions</div><div class="s">Manage who can access what</div></div></div>
+      <div class="item"><div><div class="t">Notifications</div><div class="s">Email and in-app alerts</div></div></div>
+      <div class="item"><div><div class="t">Audit log</div><div class="s">System activity history</div></div></div>
+    </div>
+  `,
+};
+
+function render(active){
+  document.getElementById('sidebar').innerHTML = `
+    <div class="brand">
+      <span class="brand-badge">EMS</span>
+      <div>
+        <div class="brand-title">Employee Portal</div>
+        <div class="brand-sub">Management System</div>
+      </div>
+    </div>` + sections.map(s =>
+    `<button class="nav-btn ${s.id===active?'active':''}" data-id="${s.id}">${s.label}</button>`
+  ).join('');
+  document.getElementById('main').innerHTML = `<div class="section active">${content[active]()}</div>`;
+  document.querySelectorAll('.nav-btn').forEach(b => b.onclick = () => render(b.dataset.id));
+}
+render('dashboard');
+</script>
+</body>
+</html>
